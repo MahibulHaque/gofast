@@ -1,0 +1,64 @@
+services:
+{{- if .AdvancedOptions.docker }}
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    restart: unless-stopped
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      APP_ENV: ${APP_ENV}
+      PORT: ${PORT}
+      DB_HOST: ${BLUEPRINT_DB_HOST}
+      DB_PORT:  ${BLUEPRINT_DB_PORT}
+      DB_USERNAME: ${BLUEPRINT_DB_USERNAME}
+      DB_ROOT_PASSWORD: ${BLUEPRINT_DB_ROOT_PASSWORD}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - blueprint
+{{- end }}
+{{- if and .AdvancedOptions.react .AdvancedOptions.docker }}
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - 5173:5173
+    networks:
+      - blueprint
+{{- end }}
+  mongo:
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "${DB_PORT}:27017"
+    volumes:
+      - mongo_volume:/data/db
+    {{- if .AdvancedOptions.docker }}
+    healthcheck:
+      test: ["CMD","mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - blueprint
+    {{- end }}
+
+volumes:
+  mongo_volume:
+{{- if .AdvancedOptions.docker }}
+networks:
+  gofast:
+{{- end }}
