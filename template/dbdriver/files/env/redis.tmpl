@@ -1,0 +1,8 @@
+{{- if .AdvancedOptions.docker }}
+DB_ADDRESS=redis
+{{- else }}
+DB_ADDRESS=localhost
+{{- end }}
+DB_PORT=6379
+DB_PASSWORD=password1234
+DB_DATABASE=0

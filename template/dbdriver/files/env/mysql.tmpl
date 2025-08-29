@@ -1,0 +1,10 @@
+{{- if .AdvancedOptions.docker }}
+DB_HOST=mysql
+{{- else }}
+DB_HOST=localhost
+{{- end }}
+DB_PORT=3306
+DB_DATABASE=gofast
+DB_USERNAME=user
+DB_PASSWORD=password1234
+DB_ROOT_PASSWORD=admin1234
