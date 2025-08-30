@@ -3,7 +3,7 @@ package framework
 import (
 	_ "embed"
 
-	"github.com/melkeydev/go-blueprint/cmd/template/advanced"
+	"github.com/mahibulhaque/gofast/template/advanced"
 )
 
 //go:embed files/routes/http_router.go.tmpl

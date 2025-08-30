@@ -8,7 +8,7 @@ import (
 //go:embed files/routes/standard_library.go.tmpl
 var standardRoutesTemplate []byte
 
-//go:embed files/server/standard_library.go.tmpl
+//go:embed files/server/server.go.tmpl
 var standardServerTemplate []byte
 
 //go:embed files/tests/default-test.go.tmpl

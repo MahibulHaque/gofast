@@ -2,7 +2,6 @@ package framework
 
 import (
 	_ "embed"
-
 	"github.com/mahibulhaque/gofast/template/advanced"
 )
 

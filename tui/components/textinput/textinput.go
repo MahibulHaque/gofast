@@ -6,8 +6,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/v2/textinput"
 	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/mahibulhaque/gofast/program"
 	"github.com/mahibulhaque/gofast/tui/styles"
-	"github.com/melkeydev/go-blueprint/cmd/program"
 )
 
 type (

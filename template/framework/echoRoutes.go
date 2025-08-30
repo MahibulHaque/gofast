@@ -1,6 +1,9 @@
 package framework
 
-import "github.com/mahibulhaque/gofast/template/advanced"
+import (
+	_ "embed"
+	"github.com/mahibulhaque/gofast/template/advanced"
+)
 
 //go:embed files/routes/echo.go.tmpl
 var echoRoutesTemplate []byte
