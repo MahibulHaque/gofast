@@ -1,9 +1,10 @@
-package multiinput
+package multiInput
 
 import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/mahibulhaque/gofast/program"
 	"github.com/mahibulhaque/gofast/steps"
 	"github.com/mahibulhaque/gofast/tui/styles"
 )
@@ -28,6 +29,19 @@ type model struct {
 
 func (m model) Init() tea.Cmd {
 	return nil
+}
+
+// InitialModelMulti initializes a multiInput step with
+// the given data
+func InitialModelMulti(choices []steps.Item, selection *Selection, header string, program *program.Project) model {
+	theme := styles.CurrentTheme()
+	return model{
+		choices:  choices,
+		selected: make(map[int]struct{}),
+		choice:   selection,
+		header:   theme.S().Title.Render(header),
+		exit:     &program.Exit,
+	}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

@@ -1,6 +1,7 @@
 package textinput
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 
@@ -60,11 +61,31 @@ func NewTextInputModel(output *Output, header string, program *program.Project) 
 	}
 }
 
+func CreateErrorInputModel(err error) model {
+
+	themeStyles := styles.CurrentTheme().S()
+	ti := textinput.New()
+
+	ti.Styles = themeStyles.TextInput
+	ti.Focus()
+	ti.CharLimit = 156
+	ti.SetWidth(20)
+	exit := true
+
+	return model{
+		textInput: ti,
+		err:       errors.New(themeStyles.Error.Render(err.Error())),
+		output:    nil,
+		header:    "",
+		exit:      &exit,
+	}
+}
+
 func (m model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {

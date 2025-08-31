@@ -1,9 +1,10 @@
-package multiselect
+package multiSelect
 
 import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/mahibulhaque/gofast/program"
 	"github.com/mahibulhaque/gofast/steps"
 	"github.com/mahibulhaque/gofast/tui/styles"
 )
@@ -27,6 +28,17 @@ type model struct {
 
 func (m model) Init() tea.Cmd {
 	return nil
+}
+
+func InitialModelMultiSelect(options []steps.Item, selection *Selection, header string, program *program.Project) model {
+	theme := styles.CurrentTheme()
+	return model{
+		options:  options,
+		selected: make(map[int]struct{}),
+		choices:  selection,
+		header:   theme.S().Title.Render(header),
+		exit:     &program.Exit,
+	}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
