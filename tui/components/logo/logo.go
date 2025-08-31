@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/charmbracelet/x/exp/slice"
+	"github.com/mahibulhaque/gofast/tui/styles"
 )
 
 // letterform represents a letterform. It can be stretched horizontally by
@@ -69,7 +70,7 @@ func Render(version string, compact bool, o Opts) string {
 	fastWidth := lipgloss.Width(fast)
 	b := new(strings.Builder)
 	for r := range strings.SplitSeq(fast, "\n") {
-		fmt.Fprintln(b, applyForegroundGrad(r, o.TitleColorA, o.TitleColorB))
+		fmt.Fprintln(b, styles.ApplyForegroundGrad(r, o.TitleColorA, o.TitleColorB))
 	}
 	fast = b.String()
 
@@ -128,12 +129,13 @@ func Render(version string, compact bool, o Opts) string {
 // SmallRender renders a smaller version of the Gofast logo, suitable for
 // smaller windows or sidebar usage.
 func SmallRender(width int, o Opts) string {
-	title := lipgloss.NewStyle().Foreground(o.CharmColor).Render("Gofast™")
-	title = fmt.Sprintf("%s %s", title, applyBoldForegroundGrad("Fast", o.TitleColorA, o.TitleColorB))
+	t := styles.CurrentTheme()
+	title := t.S().Base.Foreground(t.Secondary).Render("Gofast™")
+	title = fmt.Sprintf("%s %s", title, styles.ApplyBoldForegroundGrad("Fast", t.Secondary, t.Primary))
 	remainingWidth := width - lipgloss.Width(title) - 1 // 1 for the space after "Fast"
 	if remainingWidth > 0 {
 		lines := strings.Repeat("╱", remainingWidth)
-		title = fmt.Sprintf("%s %s", title, lipgloss.NewStyle().Foreground(o.FieldColor).Render(lines))
+		title = fmt.Sprintf("%s %s", title, t.S().Base.Foreground(t.Primary).Render(lines))
 	}
 	return title
 }
@@ -298,64 +300,4 @@ func stretchLetterformPart(s string, p letterformProps) string {
 		parts[i] = s
 	}
 	return lipgloss.JoinHorizontal(lipgloss.Top, parts...)
-}
-
-func lerp(a, b uint8, t float64) uint8 {
-	return uint8(float64(a) + (float64(b)-float64(a))*t)
-}
-
-// applyForegroundGrad applies a left-to-right gradient over the input string.
-func applyForegroundGrad(input string, color1, color2 color.Color) string {
-	if input == "" {
-		return ""
-	}
-
-	r1, g1, b1, _ := color1.RGBA()
-	r2, g2, b2, _ := color2.RGBA()
-
-	// convert from 16-bit (0–65535) to 8-bit (0–255)
-	r1b, g1b, b1b := uint8(r1>>8), uint8(g1>>8), uint8(b1>>8)
-	r2b, g2b, b2b := uint8(r2>>8), uint8(g2>>8), uint8(b2>>8)
-
-	runes := []rune(input)
-	n := len(runes)
-	var b strings.Builder
-
-	for i, r := range runes {
-		t := float64(i) / float64(max(1, n-1)) // interpolation factor [0,1]
-
-		rb := lerp(r1b, r2b, t)
-		gb := lerp(g1b, g2b, t)
-		bb := lerp(b1b, b2b, t)
-
-		style := lipgloss.NewStyle().Foreground(color.RGBA{rb, gb, bb, 255})
-		b.WriteString(style.Render(string(r)))
-	}
-	return b.String()
-}
-
-func applyBoldForegroundGrad(input string, color1, color2 color.Color) string {
-	if input == "" {
-		return ""
-	}
-
-	r1, g1, b1, _ := color1.RGBA()
-	r2, g2, b2, _ := color2.RGBA()
-	r1b, g1b, b1b := uint8(r1>>8), uint8(g1>>8), uint8(b1>>8)
-	r2b, g2b, b2b := uint8(r2>>8), uint8(g2>>8), uint8(b2>>8)
-
-	runes := []rune(input)
-	n := len(runes)
-	var b strings.Builder
-
-	for i, r := range runes {
-		t := float64(i) / float64(max(1, n-1))
-		rb := lerp(r1b, r2b, t)
-		gb := lerp(g1b, g2b, t)
-		bb := lerp(b1b, b2b, t)
-
-		style := lipgloss.NewStyle().Foreground(color.RGBA{rb, gb, bb, 255}).Bold(true)
-		b.WriteString(style.Render(string(r)))
-	}
-	return b.String()
 }
