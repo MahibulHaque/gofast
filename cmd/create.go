@@ -9,6 +9,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea/v2"
 	"github.com/mahibulhaque/gofast/flags"
+	"github.com/mahibulhaque/gofast/modules"
 	"github.com/mahibulhaque/gofast/steps"
 	"github.com/mahibulhaque/gofast/tui/components/logo"
 	"github.com/mahibulhaque/gofast/tui/components/multiInput"
@@ -16,7 +17,7 @@ import (
 	"github.com/mahibulhaque/gofast/tui/components/spinner"
 	"github.com/mahibulhaque/gofast/tui/components/textinput"
 	"github.com/mahibulhaque/gofast/tui/styles"
-	"github.com/mahibulhaque/gofast/utils"
+	"github.com/melkeydev/go-blueprint/cmd/program"
 	"github.com/spf13/cobra"
 )
 
@@ -34,10 +35,10 @@ func init() {
 	createCmd.Flags().Var(&advancedFeatures, "feature", fmt.Sprintf("Advanced feature to use. Allowed values: %s", strings.Join(flags.AllowedAdvancedFeatures, ", ")))
 	createCmd.Flags().VarP(&flagGit, "git", "g", fmt.Sprintf("Git to use. Allowed values: %s", strings.Join(flags.AllowedGitsOptions, ", ")))
 
-	utils.RegisterStaticCompletions(createCmd, "framework", flags.AllowedProjectTypes)
-	utils.RegisterStaticCompletions(createCmd, "driver", flags.AllowedDBDrivers)
-	utils.RegisterStaticCompletions(createCmd, "feature", flags.AllowedAdvancedFeatures)
-	utils.RegisterStaticCompletions(createCmd, "git", flags.AllowedGitsOptions)
+	RegisterStaticCompletions(createCmd, "framework", flags.AllowedProjectTypes)
+	RegisterStaticCompletions(createCmd, "driver", flags.AllowedDBDrivers)
+	RegisterStaticCompletions(createCmd, "feature", flags.AllowedAdvancedFeatures)
+	RegisterStaticCompletions(createCmd, "git", flags.AllowedGitsOptions)
 }
 
 type Options struct {
@@ -50,7 +51,6 @@ type Options struct {
 }
 
 func createCmdRun(cmd *cobra.Command, args []string) {
-	var tprogram *tea.Program
 	var err error
 
 	theme := styles.CurrentTheme()
@@ -58,12 +58,12 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 	isInteractive := false
 	flagName := cmd.Flag("name").Value.String()
 
-	if flagName != "" && !utils.ValidateModuleName(flagName) {
+	if flagName != "" && !modules.ValidateModuleName(flagName) {
 		err = fmt.Errorf("'%s' is not a valid module name. Please choose a different name", flagName)
 		cobra.CheckErr(textinput.CreateErrorInputModel(err).Err())
 	}
 
-	rootDirName := utils.GetRootDir(flagName)
+	rootDirName := modules.GetRootDir(flagName)
 	if rootDirName != "" && doesDirectoryExistAndIsNotEmpty(rootDirName) {
 		err = fmt.Errorf("directory '%s' already exists and is not empty. Please choose a different name", rootDirName)
 		cobra.CheckErr(textinput.CreateErrorInputModel(err).Err())
@@ -114,12 +114,12 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 			cobra.CheckErr(textinput.CreateErrorInputModel(err).Err())
 		}
 
-		if options.ProjectName.Output != "" && !utils.ValidateModuleName(options.ProjectName.Output) {
+		if options.ProjectName.Output != "" && !modules.ValidateModuleName(options.ProjectName.Output) {
 			err = fmt.Errorf("'%s' is not a valid module name. Please choose a different name", options.ProjectName.Output)
 			cobra.CheckErr(textinput.CreateErrorInputModel(err).Err())
 		}
 
-		rootDirName = utils.GetRootDir(options.ProjectName.Output)
+		rootDirName = modules.GetRootDir(options.ProjectName.Output)
 
 		if doesDirectoryExistAndIsNotEmpty(rootDirName) {
 			err = fmt.Errorf("directory '%s' already exists and is not empty. Please choose a different name", rootDirName)
@@ -267,7 +267,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 		}
 
 		fmt.Println(theme.S().Text.Render("\nNext steps:"))
-		fmt.Println(theme.S().Text.Render(fmt.Sprintf("• cd into the newly created project with: `cd %s`\n", utils.GetRootDir(project.ProjectName))))
+		fmt.Println(theme.S().Text.Render(fmt.Sprintf("• cd into the newly created project with: `cd %s`\n", modules.GetRootDir(project.ProjectName))))
 
 		if options.Advanced.Choices["React"] {
 			fmt.Println(theme.S().Text.Render("• cd into frontend\n"))
@@ -275,7 +275,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 			fmt.Println(theme.S().Text.Render("• npm run dev\n"))
 		}
 		if isInteractive {
-			nonInteractiveCommand := utils.NonInteractiveCommand(cmd.Use, cmd.Flags())
+			nonInteractiveCommand := NonInteractiveCommand(cmd.Use, cmd.Flags())
 			fmt.Println(theme.S().Text.Render("Tip: Repeat the equivalent with the following non-interactive command:"))
 			fmt.Println(theme.S().Text.Italic(false).Render(fmt.Sprintf("• %s\n", nonInteractiveCommand)))
 		}

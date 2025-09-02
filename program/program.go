@@ -12,13 +12,16 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/mahibulhaque/gofast/executor"
 	"github.com/mahibulhaque/gofast/flags"
+	gitconfig "github.com/mahibulhaque/gofast/gitconfig"
+	"github.com/mahibulhaque/gofast/gocmds"
+	"github.com/mahibulhaque/gofast/modules"
 	tpl "github.com/mahibulhaque/gofast/template"
 	"github.com/mahibulhaque/gofast/template/advanced"
 	"github.com/mahibulhaque/gofast/template/dbdriver"
 	"github.com/mahibulhaque/gofast/template/docker"
 	"github.com/mahibulhaque/gofast/template/framework"
-	"github.com/mahibulhaque/gofast/utils"
 )
 
 type Project struct {
@@ -222,7 +225,7 @@ func (p *Project) CreateMainFile() error {
 
 	if p.GitOptions.String() != flags.Skip {
 
-		emailSet, err := utils.CheckGitConfig("user.email")
+		emailSet, err := gitconfig.CheckConfig("user.email")
 		if err != nil {
 			return err
 		}
@@ -235,7 +238,7 @@ func (p *Project) CreateMainFile() error {
 
 	p.ProjectName = strings.TrimSpace(p.ProjectName)
 
-	projectPath := filepath.Join(p.AbsolutePath, utils.GetRootDir(p.ProjectName))
+	projectPath := filepath.Join(p.AbsolutePath, modules.GetRootDir(p.ProjectName))
 
 	if _, err := os.Stat(projectPath); os.IsNotExist(err) {
 		err := os.MkdirAll(projectPath, 0o751)
@@ -251,7 +254,7 @@ func (p *Project) CreateMainFile() error {
 	// Create the map for our program
 	p.createFrameworkMap()
 
-	err := utils.InitGoMod(p.ProjectName, projectPath)
+	err := gocmds.InitGoMod(p.ProjectName, projectPath)
 	if err != nil {
 		log.Printf("Could not initialize go.mod in new project %v\n", err)
 		return err
@@ -259,7 +262,7 @@ func (p *Project) CreateMainFile() error {
 
 	// Install the correct package for the selected framework
 	if p.ProjectType != flags.StandardLibrary {
-		err = utils.GoGetPackage(projectPath, p.FrameworkMap[p.ProjectType].packageName)
+		err = gocmds.GoGetPackage(projectPath, p.FrameworkMap[p.ProjectType].packageName)
 		if err != nil {
 			log.Println("Could not install go dependency for the chosen framework")
 			return err
@@ -269,7 +272,7 @@ func (p *Project) CreateMainFile() error {
 	if p.DBDriver != "none" {
 		p.createDBDriverMap()
 
-		err = utils.GoGetPackage(projectPath, p.DBDriverMap[p.DBDriver].packageName)
+		err = gocmds.GoGetPackage(projectPath, p.DBDriverMap[p.DBDriver].packageName)
 
 		if err != nil {
 			log.Println("Could not install go dependency for chosen driver")
@@ -311,7 +314,7 @@ func (p *Project) CreateMainFile() error {
 		}
 	}
 
-	err = utils.GoGetPackage(projectPath, godotenvPackage)
+	err = gocmds.GoGetPackage(projectPath, godotenvPackage)
 
 	if err != nil {
 		log.Println("Could not install go dependency")
@@ -475,20 +478,20 @@ func (p *Project) CreateMainFile() error {
 		return err
 	}
 
-	err = utils.GoTidy(projectPath)
+	err = gocmds.GoTidy(projectPath)
 	if err != nil {
 		log.Printf("Could not go tidy in new project %v\n", err)
 		return err
 	}
 
-	err = utils.GoFmt(projectPath)
+	err = gocmds.GoFmt(projectPath)
 	if err != nil {
 		log.Printf("Could not gofmt in new project %v\n", err)
 		return err
 	}
 
 	if p.GitOptions != flags.Skip {
-		nameSet, err := utils.CheckGitConfig("user.name")
+		nameSet, err := gitconfig.CheckConfig("user.name")
 		if err != nil {
 			return err
 		}
@@ -499,14 +502,14 @@ func (p *Project) CreateMainFile() error {
 			panic("\nGIT CONFIG ISSUE: user.name is not set in git config.\n")
 		}
 		// Initialize git repo
-		err = utils.ExecuteCmd("git", []string{"init"}, projectPath)
+		err = executor.ExecuteCmd("git", []string{"init"}, projectPath)
 		if err != nil {
 			log.Printf("Error initializing git repo: %v", err)
 			return err
 		}
 
 		// Git add files
-		err = utils.ExecuteCmd("git", []string{"add", "."}, projectPath)
+		err = executor.ExecuteCmd("git", []string{"add", "."}, projectPath)
 		if err != nil {
 			log.Printf("Error adding files to git repo: %v", err)
 			return err
@@ -514,7 +517,7 @@ func (p *Project) CreateMainFile() error {
 
 		if p.GitOptions == flags.Commit {
 			// Git commit files
-			err = utils.ExecuteCmd("git", []string{"commit", "-m", "Initial commit"}, projectPath)
+			err = executor.ExecuteCmd("git", []string{"commit", "-m", "Initial commit"}, projectPath)
 			if err != nil {
 				log.Printf("Error committing files to git repo: %v", err)
 				return err
@@ -612,7 +615,7 @@ func (p *Project) CreateWebsocketImports(appDir string) {
 	// Websockets require a different package depending on what framework is
 	// choosen. The application calls go mod tidy at the end so we don't
 	// have to here
-	err := utils.GoGetPackage(appDir, websocketDependency)
+	err := gocmds.GoGetPackage(appDir, websocketDependency)
 	if err != nil {
 		log.Fatal(err)
 	}
