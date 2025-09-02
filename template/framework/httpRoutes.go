@@ -11,8 +11,6 @@ var standardRoutesTemplate []byte
 //go:embed files/server/server.go.tmpl
 var standardServerTemplate []byte
 
-//go:embed files/tests/default-test.go.tmpl
-var standardTestHandlerTemplate []byte
 
 // StandardLibTemplate contains the methods used for building
 // an app that uses [net/http]
@@ -30,9 +28,6 @@ func (s StandardLibTemplate) Routes() []byte {
 	return standardRoutesTemplate
 }
 
-func (s StandardLibTemplate) TestHandler() []byte {
-	return standardTestHandlerTemplate
-}
 
 func (s StandardLibTemplate) WebsocketImports() []byte {
 	return advanced.StdLibWebsocketTemplImportsTemplate()

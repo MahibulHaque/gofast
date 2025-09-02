@@ -14,8 +14,6 @@ var fiberServerTemplate []byte
 //go:embed files/main/fiber_main.go.tmpl
 var fiberMainTemplate []byte
 
-//go:embed files/tests/fiber-test.go.tmpl
-var fiberTestHandlerTemplate []byte
 
 type FiberTemplates struct{}
 
@@ -30,9 +28,6 @@ func (f FiberTemplates) Routes() []byte {
 	return fiberRoutesTemplate
 }
 
-func (f FiberTemplates) TestHandler() []byte {
-	return fiberTestHandlerTemplate
-}
 
 func (f FiberTemplates) WebsocketImports() []byte {
 	return advanced.FiberWebsocketTemplImportsTemplate()

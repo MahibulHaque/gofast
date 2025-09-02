@@ -17,7 +17,7 @@ import (
 	"github.com/mahibulhaque/gofast/tui/components/spinner"
 	"github.com/mahibulhaque/gofast/tui/components/textinput"
 	"github.com/mahibulhaque/gofast/tui/styles"
-	"github.com/melkeydev/go-blueprint/cmd/program"
+	"github.com/mahibulhaque/gofast/program"
 	"github.com/spf13/cobra"
 )
 
@@ -88,7 +88,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 		ProjectType:     flagFramework,
 		DBDriver:        flagDBDriver,
 		FrameworkMap:    make(map[flags.Framework]program.Framework),
-		DBDriverMap:     make(map[flags.Database]program.Driver),
+		DBDriverMap:     make(map[flags.Database]program.DBDriver),
 		AdvancedOptions: make(map[string]bool),
 		GitOptions:      flagGit,
 	}

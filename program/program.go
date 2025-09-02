@@ -64,7 +64,6 @@ type Templater interface {
 	Main() []byte
 	Server() []byte
 	Routes() []byte
-	TestHandler() []byte
 	WebsocketImports() []byte
 }
 
@@ -580,9 +579,6 @@ func (p *Project) CreateFileWithInjection(pathToCreate string, projectPath strin
 	case "integration-tests":
 		createdTemplate := template.Must(template.New(fileName).Parse(string(p.DBDriverMap[p.DBDriver].templater.Tests())))
 		err = createdTemplate.Execute(createdFile, p)
-	case "tests":
-		createdTemplate := template.Must(template.New(fileName).Parse(string(p.FrameworkMap[p.ProjectType].templater.TestHandler())))
-		err = createdTemplate.Execute(createdFile, p)
 	case "env":
 		if p.DBDriver != "none" {
 
@@ -695,6 +691,42 @@ func (p *Project) CreateViteReactProject(projectPath string) error {
 		return fmt.Errorf("failed to write main.tsx template: %w", err)
 	}
 
+	// Create additional directories for TanStack Router and utilities
+	routesDir := filepath.Join(srcDir, "routes")
+	if err := os.MkdirAll(routesDir, 0755); err != nil {
+		return fmt.Errorf("failed to create src/routes directory: %w", err)
+	}
+
+	libDir := filepath.Join(srcDir, "lib")
+	if err := os.MkdirAll(libDir, 0755); err != nil {
+		return fmt.Errorf("failed to create src/lib directory: %w", err)
+	}
+
+	// Write TanStack Router root route and utils helper
+	if err := os.WriteFile(filepath.Join(routesDir, "__root.tsx"), advanced.ReactRootRouteFile(), 0644); err != nil {
+		return fmt.Errorf("failed to write routes/root.tsx template: %w", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(libDir, "utils.ts"), advanced.ReactUtilsFile(), 0644); err != nil {
+		return fmt.Errorf("failed to write lib/utils.ts template: %w", err)
+	}
+
+	// Write shadcn components.json for future UI generation
+	if err := os.WriteFile(filepath.Join(frontendPath, "components.json"), advanced.ReactComponentsJsonFile(), 0644); err != nil {
+		return fmt.Errorf("failed to write components.json template: %w", err)
+	}
+
+	// Ensure Vite index.html uses #app to match main.tsx
+	indexHtmlPath := filepath.Join(frontendPath, "index.html")
+	if data, err := os.ReadFile(indexHtmlPath); err == nil {
+		updated := strings.ReplaceAll(string(data), "id=\"root\"", "id=\"app\"")
+		if updated != string(data) {
+			if err := os.WriteFile(indexHtmlPath, []byte(updated), 0644); err != nil {
+				return fmt.Errorf("failed to update index.html root id: %w", err)
+			}
+		}
+	}
+
 	err = p.CreateFileWithInjection("", projectPath, ".env", "env")
 	if err != nil {
 		return fmt.Errorf("failed to create global .env file: %w", err)
@@ -719,6 +751,47 @@ func (p *Project) CreateViteReactProject(projectPath string) error {
 	frontendEnvContent := fmt.Sprintf("VITE_PORT=%s\n", vitePort)
 	if err := os.WriteFile(filepath.Join(frontendPath, ".env"), []byte(frontendEnvContent), 0644); err != nil {
 		return fmt.Errorf("failed to create frontend .env file: %w", err)
+	}
+
+	// Install dependencies
+	// 1) Install base template deps
+	installCmd := exec.Command("npm", "install", "--prefer-offline", "--no-fund")
+	installCmd.Stdout = os.Stdout
+	installCmd.Stderr = os.Stderr
+	if err := installCmd.Run(); err != nil {
+		return fmt.Errorf("failed to run npm install: %w", err)
+	}
+
+	// 2) Install TanStack runtime deps and utilities
+	deps := []string{
+		"@tanstack/react-router",
+		"@tanstack/react-query",
+		"@tanstack/react-query-devtools",
+		"@tanstack/router-devtools",
+		"clsx",
+		"tailwind-merge",
+	}
+	addDepsCmd := exec.Command("npm", append([]string{"install"}, deps...)...)
+	addDepsCmd.Stdout = os.Stdout
+	addDepsCmd.Stderr = os.Stderr
+	if err := addDepsCmd.Run(); err != nil {
+		return fmt.Errorf("failed to install runtime deps: %w", err)
+	}
+
+	// 3) Install dev deps: Vite plugins for React, TanStack Router, Tailwind v4 plugin, types
+	devDeps := []string{
+		"-D",
+		"@vitejs/plugin-react",
+		"@tanstack/router-plugin",
+		"@tailwindcss/vite",
+		"@types/react",
+		"@types/react-dom",
+	}
+	addDevDepsCmd := exec.Command("npm", append([]string{"install"}, devDeps...)...)
+	addDevDepsCmd.Stdout = os.Stdout
+	addDevDepsCmd.Stderr = os.Stderr
+	if err := addDevDepsCmd.Run(); err != nil {
+		return fmt.Errorf("failed to install dev deps: %w", err)
 	}
 
 	return nil

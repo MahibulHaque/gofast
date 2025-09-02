@@ -8,8 +8,6 @@ import (
 //go:embed files/routes/gorilla.go.tmpl
 var gorillaRoutesTemplate []byte
 
-//go:embed files/tests/default-test.go.tmpl
-var gorillaTestHandlerTemplate []byte
 
 // GorillaTemplates contains the methods used for building
 // an app that uses [github.com/gorilla/mux]
@@ -27,9 +25,6 @@ func (g GorillaTemplates) Routes() []byte {
 	return gorillaRoutesTemplate
 }
 
-func (g GorillaTemplates) TestHandler() []byte {
-	return gorillaTestHandlerTemplate
-}
 
 func (g GorillaTemplates) WebsocketImports() []byte {
 	return advanced.StdLibWebsocketTemplImportsTemplate()

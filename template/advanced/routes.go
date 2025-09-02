@@ -25,6 +25,9 @@ var reactMainFile []byte
 //go:embed files/react/src/routes/root.tsx.tmpl
 var reactRootRouteFile []byte
 
+//go:embed files/react/src/lib/utils.ts.tmpl
+var reactUtilsFile []byte
+
 func StdLibWebsocketTemplImportsTemplate() []byte {
 	return stdLibWebsocketImports
 }
@@ -51,4 +54,8 @@ func ReactMainFile() []byte {
 
 func ReactRootRouteFile() []byte {
 	return reactRootRouteFile
+}
+
+func ReactUtilsFile() []byte {
+	return reactUtilsFile
 }
