@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/v2/help"
 	"github.com/charmbracelet/bubbles/v2/textinput"
@@ -121,8 +122,10 @@ func (t *Theme) buildStyles() *Styles {
 				Suggestion:  base.Foreground(t.FgSubtle),
 			},
 			Cursor: textinput.CursorStyle{
-				Color: t.White,
-				Shape: tea.CursorBlock,
+				Color:      t.White,
+				Shape:      tea.CursorBlock,
+				Blink:      true,
+				BlinkSpeed: time.Duration(time.Duration.Milliseconds(300)),
 			},
 		},
 

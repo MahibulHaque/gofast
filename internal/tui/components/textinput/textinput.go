@@ -48,7 +48,6 @@ func NewTextInputModel(output *Output, header string, program *program.Project) 
 	themeStyles := styles.CurrentTheme().S()
 	ti := textinput.New()
 
-	ti.SetVirtualCursor(true)
 	ti.Prompt = "> "
 	ti.CharLimit = 156
 	ti.SetWidth(20)
@@ -73,7 +72,6 @@ func CreateErrorInputModel(err error) model {
 	themeStyles := styles.CurrentTheme().S()
 	ti := textinput.New()
 
-	ti.SetVirtualCursor(true)
 	ti.Prompt = "> "
 	ti.CharLimit = 156
 	ti.SetWidth(20)
