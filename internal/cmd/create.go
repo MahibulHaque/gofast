@@ -12,6 +12,7 @@ import (
 	"github.com/mahibulhaque/gofast/internal/modules"
 	"github.com/mahibulhaque/gofast/internal/program"
 	"github.com/mahibulhaque/gofast/internal/steps"
+	"github.com/mahibulhaque/gofast/internal/tui/components/list"
 	"github.com/mahibulhaque/gofast/internal/tui/components/logo"
 	"github.com/mahibulhaque/gofast/internal/tui/components/multiInput"
 	"github.com/mahibulhaque/gofast/internal/tui/components/multiSelect"
@@ -43,7 +44,7 @@ func init() {
 
 type Options struct {
 	ProjectName *textinput.Output
-	ProjectType *multiInput.Selection
+	ProjectType *list.Selection
 	DBDriver    *multiInput.Selection
 	Advanced    *multiSelect.Selection
 	Workflow    *multiInput.Selection
@@ -75,7 +76,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 
 	options := Options{
 		ProjectName: &textinput.Output{},
-		ProjectType: &multiInput.Selection{},
+		ProjectType: &list.Selection{},
 		DBDriver:    &multiInput.Selection{},
 		Advanced: &multiSelect.Selection{
 			Choices: make(map[string]bool),
@@ -103,7 +104,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 	}
 
 	if flagAdvanced {
-		fmt.Println("*** You are in advanced mode ***\n\n")
+		fmt.Println("*** You are in advanced mode ***")
 	}
 
 	if project.ProjectName == "" {
@@ -140,7 +141,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 			isInteractive = true
 			step := steps.Steps["framework"]
 
-			tprogram := tea.NewProgram(multiInput.InitialModelMulti(step.Options, options.ProjectType, step.Headers, project))
+			tprogram := tea.NewProgram(list.NewSingleSelectFromStep(step, options.ProjectType, project))
 
 			if _, err := tprogram.Run(); err != nil {
 				cobra.CheckErr(textinput.CreateErrorInputModel(err).Err())

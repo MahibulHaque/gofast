@@ -24,8 +24,8 @@ func InitSteps(projectType flags.Framework, databaseType flags.Database) *Steps 
 				StepName: "Go Project Framework",
 				Options: []Item{
 					{
-						Title: "Standard-Library",
-						Desc:  "The bulit-in Go standard library",
+						Title: "Standard-library",
+						Desc:  "The built-in Go standard library HTTP package",
 					},
 					{
 						Title: "Chi",
@@ -127,5 +127,6 @@ func InitSteps(projectType flags.Framework, databaseType flags.Database) *Steps 
 			},
 		},
 	}
+
 	return steps
 }

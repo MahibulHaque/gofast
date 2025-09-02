@@ -83,28 +83,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+	theme := styles.CurrentTheme()
 	themeStyles := styles.CurrentTheme().S()
 	s := m.header + "\n\n"
 
 	for i, choice := range m.choices {
 		cursor := " "
 		if m.cursor == i {
-			cursor = themeStyles.TextSelected.Render(">")
-			choice.Title = themeStyles.Title.Render(choice.Title)
-			choice.Desc = themeStyles.Subtitle.Render(choice.Desc)
+			cursor = themeStyles.Text.Foreground(theme.FgSelected).Render(">")
+			choice.Title = themeStyles.Text.Foreground(theme.FgSelected).Render(choice.Title)
+			choice.Desc = themeStyles.Text.Foreground(theme.FgSelected).Render(choice.Desc)
 		}
 
 		checked := " "
 		if _, ok := m.selected[i]; ok {
-			checked = themeStyles.TextSelected.Render("x")
+			checked = themeStyles.Text.Foreground(theme.FgSelected).Render("x")
 		}
 
-		title := themeStyles.TextSelected.Render(choice.Title)
-		description := themeStyles.Subtitle.Render(choice.Desc)
+		title := themeStyles.Text.Foreground(theme.FgBase).Render(choice.Title)
+		description := themeStyles.Text.Foreground(theme.FgHalfMuted).Render(choice.Desc)
 
 		s += fmt.Sprintf("%s [%s] %s\n%s\n\n", cursor, checked, title, description)
 	}
 
-	s += fmt.Sprintf("Press %s to confirm choice.\n\n", themeStyles.TextSelected.Render("y"))
+	s += fmt.Sprintf("Press %s to confirm choice.\n\n", themeStyles.Text.Foreground(theme.FgSelected).Render("y"))
 	return s
 }

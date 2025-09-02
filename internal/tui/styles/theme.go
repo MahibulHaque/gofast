@@ -95,7 +95,7 @@ func (t *Theme) buildStyles() *Styles {
 		Subtitle: base.Foreground(t.Secondary).Bold(true),
 
 		Text:         base,
-		TextSelected: base.Background(t.Primary).Foreground(t.FgSelected),
+		TextSelected: base.Foreground(t.Primary),
 
 		Muted: base.Foreground(t.FgMuted),
 
@@ -121,9 +121,8 @@ func (t *Theme) buildStyles() *Styles {
 				Suggestion:  base.Foreground(t.FgSubtle),
 			},
 			Cursor: textinput.CursorStyle{
-				Color: t.Secondary,
-				Shape: tea.CursorBar,
-				Blink: true,
+				Color: t.White,
+				Shape: tea.CursorBlock,
 			},
 		},
 
