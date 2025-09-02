@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/v2/textinput"
 	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/charmbracelet/lipgloss/v2"
 	"github.com/mahibulhaque/gofast/internal/program"
 	"github.com/mahibulhaque/gofast/internal/tui/styles"
 )
@@ -47,11 +48,17 @@ func NewTextInputModel(output *Output, header string, program *program.Project) 
 	themeStyles := styles.CurrentTheme().S()
 	ti := textinput.New()
 
-	ti.Styles = themeStyles.TextInput
-	ti.Focus()
+	ti.SetVirtualCursor(false)
+	ti.Prompt = "> "
 	ti.CharLimit = 156
 	ti.SetWidth(20)
+	ti.Validate = sanitizeTextInput
+
+	ti.SetStyles(themeStyles.TextInput)
+	ti.Focus()
+
 	exit := true
+
 	return model{
 		textInput: ti,
 		err:       nil,
@@ -66,10 +73,13 @@ func CreateErrorInputModel(err error) model {
 	themeStyles := styles.CurrentTheme().S()
 	ti := textinput.New()
 
-	ti.Styles = themeStyles.TextInput
-	ti.Focus()
+	ti.SetVirtualCursor(false)
+	ti.Prompt = "> "
 	ti.CharLimit = 156
 	ti.SetWidth(20)
+
+	ti.SetStyles(themeStyles.TextInput)
+	ti.Focus()
 	exit := true
 
 	return model{
@@ -111,7 +121,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return fmt.Sprintf("%s\n\n%s\n\n", m.header, m.textInput.View())
+	inputView := m.textInput.View()
+
+	content := lipgloss.JoinVertical(lipgloss.Left, m.header, inputView, "\n\n")
+	return content
 }
 
 func (m model) Err() string {
