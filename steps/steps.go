@@ -91,11 +91,6 @@ func InitSteps(projectType flags.Framework, databaseType flags.Database) *Steps 
 						Desc:  "Use Vite to spin up a React project in TypeScript.",
 					},
 					{
-						Flag:  "ReactTanstackRouter",
-						Title: "React & Tanstack",
-						Desc:  "Use Vite to spin up a React project in TypeScript with Tanstack Query & Router",
-					},
-					{
 						Flag:  "GitHubAction",
 						Title: "Go Project Workflow",
 						Desc:  "Workflow templates for testing, cross-compiling and releasing Go projects",

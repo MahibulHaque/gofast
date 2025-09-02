@@ -31,8 +31,6 @@ func (f *Framework) Type() string {
 }
 
 func (f *Framework) Set(value string) error {
-	// Contains isn't available in 1.20 yet
-	// if AllowedProjectTypes.Contains(value) {
 	for _, project := range AllowedProjectTypes {
 		if project == value {
 			*f = Framework(value)
