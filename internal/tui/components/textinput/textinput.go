@@ -48,7 +48,7 @@ func NewTextInputModel(output *Output, header string, program *program.Project) 
 	themeStyles := styles.CurrentTheme().S()
 	ti := textinput.New()
 
-	ti.SetVirtualCursor(false)
+	ti.SetVirtualCursor(true)
 	ti.Prompt = "> "
 	ti.CharLimit = 156
 	ti.SetWidth(20)
@@ -57,7 +57,7 @@ func NewTextInputModel(output *Output, header string, program *program.Project) 
 	ti.SetStyles(themeStyles.TextInput)
 	ti.Focus()
 
-	exit := true
+	exit := false
 
 	return model{
 		textInput: ti,
@@ -73,14 +73,14 @@ func CreateErrorInputModel(err error) model {
 	themeStyles := styles.CurrentTheme().S()
 	ti := textinput.New()
 
-	ti.SetVirtualCursor(false)
+	ti.SetVirtualCursor(true)
 	ti.Prompt = "> "
 	ti.CharLimit = 156
 	ti.SetWidth(20)
 
 	ti.SetStyles(themeStyles.TextInput)
 	ti.Focus()
-	exit := true
+	exit := false
 
 	return model{
 		textInput: ti,
@@ -113,7 +113,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case errorMsg:
 		m.err = msg
 		*m.exit = true
-		return m, nil
+		return m, tea.Quit
 	}
 
 	m.textInput, cmd = m.textInput.Update(msg)
@@ -129,4 +129,8 @@ func (m model) View() string {
 
 func (m model) Err() string {
 	return m.err.Error()
+}
+
+func (m model) ShouldExit() bool {
+	return *m.exit
 }

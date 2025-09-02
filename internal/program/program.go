@@ -431,11 +431,6 @@ func (p *Project) CreateMainFile() error {
 		}
 	}
 
-	err = p.CreateFileWithInjection(internalServerPath, projectPath, "routes_test.go", "tests")
-	if err != nil {
-		return err
-	}
-
 	err = p.CreateFileWithInjection(internalServerPath, projectPath, "server.go", "server")
 	if err != nil {
 		log.Printf("Error injecting server.go file: %v", err)

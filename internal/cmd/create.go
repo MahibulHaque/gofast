@@ -14,7 +14,6 @@ import (
 	"github.com/mahibulhaque/gofast/internal/steps"
 	"github.com/mahibulhaque/gofast/internal/tui/components/list"
 	"github.com/mahibulhaque/gofast/internal/tui/components/logo"
-	"github.com/mahibulhaque/gofast/internal/tui/components/multiInput"
 	"github.com/mahibulhaque/gofast/internal/tui/components/multiSelect"
 	"github.com/mahibulhaque/gofast/internal/tui/components/spinner"
 	"github.com/mahibulhaque/gofast/internal/tui/components/textinput"
@@ -45,10 +44,10 @@ func init() {
 type Options struct {
 	ProjectName *textinput.Output
 	ProjectType *list.Selection
-	DBDriver    *multiInput.Selection
+	DBDriver    *list.Selection
 	Advanced    *multiSelect.Selection
-	Workflow    *multiInput.Selection
-	Git         *multiInput.Selection
+	Workflow    *list.Selection
+	Git         *list.Selection
 }
 
 func createCmdRun(cmd *cobra.Command, args []string) {
@@ -77,11 +76,11 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 	options := Options{
 		ProjectName: &textinput.Output{},
 		ProjectType: &list.Selection{},
-		DBDriver:    &multiInput.Selection{},
+		DBDriver:    &list.Selection{},
 		Advanced: &multiSelect.Selection{
 			Choices: make(map[string]bool),
 		},
-		Git: &multiInput.Selection{},
+		Git: &list.Selection{},
 	}
 
 	project := &program.Project{
@@ -109,10 +108,18 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 
 	if project.ProjectName == "" {
 		isInteractive = true
-		tprogram := tea.NewProgram(textinput.NewTextInputModel(options.ProjectName, "What is the name of your project?", project))
+		textInputModel := textinput.NewTextInputModel(options.ProjectName, "What is the name of your project?", project)
+		tprogram := tea.NewProgram(textInputModel)
 		if _, err := tprogram.Run(); err != nil {
 			log.Printf("Name of project contains an error: %v", err)
 			cobra.CheckErr(textinput.CreateErrorInputModel(err).Err())
+		}
+
+		// Check if user wants to exit (Ctrl+C or Esc)
+		if textInputModel.ShouldExit() {
+			project.Exit = true
+			project.ExitCLI(tprogram)
+			return
 		}
 
 		if options.ProjectName.Output != "" && !modules.ValidateModuleName(options.ProjectName.Output) {
@@ -163,7 +170,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 
 			step := steps.Steps["driver"]
 
-			tprogram = tea.NewProgram(multiInput.InitialModelMulti(step.Options, options.DBDriver, step.Headers, project))
+			tprogram = tea.NewProgram(list.NewSingleSelectFromStep(step, options.DBDriver, project))
 			if _, err := tprogram.Run(); err != nil {
 				cobra.CheckErr(textinput.CreateErrorInputModel(err).Err())
 			}
@@ -214,7 +221,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 		if project.GitOptions == "" {
 			isInteractive = true
 			step := steps.Steps["git"]
-			tprogram = tea.NewProgram(multiInput.InitialModelMulti(step.Options, options.Git, step.Headers, project))
+			tprogram = tea.NewProgram(list.NewSingleSelectFromStep(step, options.Git, project))
 			if _, err := tprogram.Run(); err != nil {
 				cobra.CheckErr(textinput.CreateErrorInputModel(err).Err())
 			}
