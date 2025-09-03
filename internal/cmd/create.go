@@ -8,13 +8,13 @@ import (
 	"sync"
 
 	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/charmbracelet/lipgloss/v2"
 	"github.com/mahibulhaque/gofast/internal/flags"
 	"github.com/mahibulhaque/gofast/internal/modules"
 	"github.com/mahibulhaque/gofast/internal/program"
 	"github.com/mahibulhaque/gofast/internal/steps"
 	"github.com/mahibulhaque/gofast/internal/tui/components/list"
 	"github.com/mahibulhaque/gofast/internal/tui/components/logo"
-	"github.com/mahibulhaque/gofast/internal/tui/components/multiSelect"
 	"github.com/mahibulhaque/gofast/internal/tui/components/spinner"
 	"github.com/mahibulhaque/gofast/internal/tui/components/textinput"
 	"github.com/mahibulhaque/gofast/internal/tui/styles"
@@ -45,7 +45,7 @@ type Options struct {
 	ProjectName *textinput.Output
 	ProjectType *list.Selection
 	DBDriver    *list.Selection
-	Advanced    *multiSelect.Selection
+	Advanced    *list.MultiSelection
 	Workflow    *list.Selection
 	Git         *list.Selection
 }
@@ -77,8 +77,8 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 		ProjectName: &textinput.Output{},
 		ProjectType: &list.Selection{},
 		DBDriver:    &list.Selection{},
-		Advanced: &multiSelect.Selection{
-			Choices: make(map[string]bool),
+		Advanced: &list.MultiSelection{
+			Selected: make(map[int]bool),
 		},
 		Git: &list.Selection{},
 	}
@@ -94,7 +94,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 	}
 
 	steps := steps.InitSteps(flagFramework, flagDBDriver)
-	fmt.Printf("%s\n", logo.Render("0.0.1", true, logo.DefaultOpts()))
+	fmt.Printf("%s\n", logo.Render("0.0.1", false, logo.DefaultOpts()))
 
 	// Advanced option steps:
 	flagAdvanced, err := cmd.Flags().GetBool("advanced")
@@ -103,7 +103,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 	}
 
 	if flagAdvanced {
-		fmt.Println("*** You are in advanced mode ***")
+		fmt.Println(theme.S().Title.Render("*** You are in advanced mode ***"))
 	}
 
 	if project.ProjectName == "" {
@@ -197,19 +197,20 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 
 				isInteractive = true
 				step := steps.Steps["advanced"]
-				tprogram = tea.NewProgram(multiSelect.InitialModelMultiSelect(step.Options, options.Advanced, step.Headers, project))
-
+				tprogram = tea.NewProgram(list.NewMultiSelectFromStep(step, options.Advanced, project))
 				if _, err := tprogram.Run(); err != nil {
 					cobra.CheckErr(textinput.CreateErrorInputModel(err).Err())
 				}
 
 				project.ExitCLI(tprogram)
 
-				for key, opt := range options.Advanced.Choices {
-					project.AdvancedOptions[strings.ToLower(key)] = opt
-					err := cmd.Flag("feature").Value.Set(strings.ToLower(key))
-					if err != nil {
-						log.Fatal("failed to set the feature flag value", err)
+				for key, opt := range options.Advanced.Selected {
+					if opt && key < len(options.Advanced.Choices) {
+						project.AdvancedOptions[strings.ToLower(options.Advanced.Choices[key])] = opt
+						err := cmd.Flag("feature").Value.Set(strings.ToLower(options.Advanced.Choices[key]))
+						if err != nil {
+							log.Fatal("failed to set the feature flag value", err)
+						}
 					}
 				}
 
@@ -274,18 +275,28 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 			cobra.CheckErr(textinput.CreateErrorInputModel(err).Err())
 		}
 
-		fmt.Println(theme.S().Text.Render("\nNext steps:"))
-		fmt.Println(theme.S().Text.Render(fmt.Sprintf("• cd into the newly created project with: `cd %s`\n", modules.GetRootDir(project.ProjectName))))
+		// Styled next steps header and bullets
+		fmt.Println()
+		rootDir := modules.GetRootDir(project.ProjectName)
 
-		if options.Advanced.Choices["React"] {
-			fmt.Println(theme.S().Text.Render("• cd into frontend\n"))
-			fmt.Println(theme.S().Text.Render("• npm install\n"))
-			fmt.Println(theme.S().Text.Render("• npm run dev\n"))
+		tipsContent := lipgloss.JoinVertical(
+			lipgloss.Left,
+			theme.S().Title.Render("Next steps:"),
+			lipgloss.JoinHorizontal(lipgloss.Left, theme.S().TextSelected.Render(fmt.Sprintf("cd %s", rootDir))),
+		)
+
+		fmt.Println(tipsContent)
+
+		if project.AdvancedOptions["react"] {
+			tipsContent = lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinHorizontal(lipgloss.Left, theme.S().Subtle.Render("• "), theme.S().Text.Render("cd frontend")), lipgloss.JoinHorizontal(lipgloss.Left, theme.S().Subtle.Render("• "), theme.S().Text.Render("npm install")), lipgloss.JoinHorizontal(lipgloss.Left, theme.S().Subtle.Render("• "), theme.S().Text.Render("npm run dev")))
+
+			fmt.Println(tipsContent)
 		}
 		if isInteractive {
 			nonInteractiveCommand := NonInteractiveCommand(cmd.Use, cmd.Flags())
-			fmt.Println(theme.S().Text.Render("Tip: Repeat the equivalent with the following non-interactive command:"))
-			fmt.Println(theme.S().Text.Italic(false).Render(fmt.Sprintf("• %s\n", nonInteractiveCommand)))
+			tipsContent = lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinHorizontal(lipgloss.Left, theme.S().Info.Render("Tip - "), theme.S().Text.Render("Repeat with the following non-interactive command:")), theme.S().TextSelected.Render(nonInteractiveCommand))
+
+			fmt.Println(tipsContent)
 		}
 
 		err = spinner.ReleaseTerminal()

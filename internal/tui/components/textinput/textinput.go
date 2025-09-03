@@ -50,7 +50,7 @@ func NewTextInputModel(output *Output, header string, program *program.Project) 
 
 	ti.Prompt = "> "
 	ti.CharLimit = 156
-	ti.SetWidth(20)
+	ti.SetWidth(80)
 	ti.Validate = sanitizeTextInput
 
 	ti.SetStyles(themeStyles.TextInput)
@@ -74,7 +74,7 @@ func CreateErrorInputModel(err error) model {
 
 	ti.Prompt = "> "
 	ti.CharLimit = 156
-	ti.SetWidth(20)
+	ti.SetWidth(80)
 
 	ti.SetStyles(themeStyles.TextInput)
 	ti.Focus()
@@ -104,7 +104,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.output.update(m.textInput.Value())
 				return m, tea.Quit
 			}
-		case "ctrl+c", "esc":
+		case "ctrl+c", "esc", "q":
 			*m.exit = true
 			return m, tea.Quit
 		}
@@ -121,7 +121,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	inputView := m.textInput.View()
 
-	content := lipgloss.JoinVertical(lipgloss.Left, m.header, inputView, "\n\n")
+	theme := styles.CurrentTheme()
+	borderedInput := theme.S().Base.
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(theme.BorderFocus).
+		Padding(0, 1).
+		Width(80).
+		Render(inputView)
+
+	content := lipgloss.JoinVertical(lipgloss.Left, m.header, borderedInput, "\n")
 	return content
 }
 

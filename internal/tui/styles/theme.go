@@ -123,9 +123,9 @@ func (t *Theme) buildStyles() *Styles {
 			},
 			Cursor: textinput.CursorStyle{
 				Color:      t.White,
-				Shape:      tea.CursorBlock,
+				Shape:      tea.CursorBar,
 				Blink:      true,
-				BlinkSpeed: time.Duration(time.Duration.Milliseconds(300)),
+				BlinkSpeed: time.Duration(time.Duration.Milliseconds(200)),
 			},
 		},
 
