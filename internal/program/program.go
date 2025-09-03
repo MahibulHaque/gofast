@@ -761,8 +761,8 @@ func (p *Project) CreateViteReactProject(projectPath string) error {
 	deps := []string{
 		"@tanstack/react-router",
 		"@tanstack/react-query",
-		"@tanstack/react-query-devtools",
-		"@tanstack/router-devtools",
+		"tailwindcss",
+		"@tailwindcss/vite",
 		"clsx",
 		"tailwind-merge",
 	}
@@ -776,11 +776,11 @@ func (p *Project) CreateViteReactProject(projectPath string) error {
 	// 3) Install dev deps: Vite plugins for React, TanStack Router, Tailwind v4 plugin, types
 	devDeps := []string{
 		"-D",
-		"@vitejs/plugin-react",
+		"@tanstack/react-query-devtools",
+		"@tanstack/react-router-devtools",
+		"@tanstack/react-devtools",
 		"@tanstack/router-plugin",
-		"@tailwindcss/vite",
-		"@types/react",
-		"@types/react-dom",
+		"@tanstack/eslint-plugin-query",
 	}
 	addDevDepsCmd := exec.Command("npm", append([]string{"install"}, devDeps...)...)
 	addDevDepsCmd.Stdout = os.Stdout
