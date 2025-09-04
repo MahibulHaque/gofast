@@ -207,8 +207,8 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 
 				for key, opt := range options.Advanced.Selected {
 					if opt && key < len(options.Advanced.Choices) {
-						project.AdvancedOptions[strings.ToLower(options.Advanced.Choices[key])] = opt
-						err := cmd.Flag("feature").Value.Set(strings.ToLower(options.Advanced.Choices[key]))
+						project.AdvancedOptions[strings.ToLower(options.Advanced.Flags[key])] = opt
+						err := cmd.Flag("feature").Value.Set(strings.ToLower(options.Advanced.Flags[key]))
 						if err != nil {
 							log.Fatal("failed to set the feature flag value ", err)
 						}
