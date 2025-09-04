@@ -708,6 +708,10 @@ func (p *Project) CreateViteReactProject(projectPath string) error {
 		return fmt.Errorf("failed to write tsconfig.json template: %w", err)
 	}
 
+	if err := os.WriteFile(filepath.Join(frontendPath, "tsconfig.app.json"), advanced.ReactTsConfigAppJsonFile(), 0644); err != nil {
+		return fmt.Errorf("failed to write tsconfig.app.json template: %w", err)
+	}
+
 	if err := os.WriteFile(filepath.Join(frontendPath, "vite.config.ts"), advanced.ReactViteConfigFile(), 0644); err != nil {
 		return fmt.Errorf("failed to write main.tsx template: %w", err)
 	}
@@ -736,8 +740,27 @@ func (p *Project) CreateViteReactProject(projectPath string) error {
 		return fmt.Errorf("failed to write routes/root.tsx template: %w", err)
 	}
 
+	// Write TanStack Router root route and utils helper
+	if err := os.WriteFile(filepath.Join(routesDir, "index.tsx"), advanced.ReactIndexRouteFile(), 0644); err != nil {
+		return fmt.Errorf("failed to write routes/index.tsx template: %w", err)
+	}
+
+	// Write TanStack Router root route and utils helper
+	if err := os.WriteFile(filepath.Join(routesDir, "demo.tanstack-query.tsx"), advanced.ReactDemoTanstackQueryRouteFile(), 0644); err != nil {
+		return fmt.Errorf("failed to write routes/demo.tanstack-query.tsx template: %w", err)
+	}
+
+	componentsDir := filepath.Join(srcDir, "components")
+	if err := os.MkdirAll(componentsDir, 0755); err != nil {
+		return fmt.Errorf("failed to create src/components directory: %w", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(componentsDir, "Header.tsx"), advanced.ReactHeaderComponentFile(), 0644); err != nil {
+		return fmt.Errorf("failed to write Header.tsx template: %w", err)
+	}
+
 	if err := os.WriteFile(filepath.Join(libDir, "utils.ts"), advanced.ReactUtilsFile(), 0644); err != nil {
-		return fmt.Errorf("failed to write lib/utils.ts template: %w", err)
+		return fmt.Errorf("failed to write utils.ts template: %w", err)
 	}
 
 	// Write shadcn components.json for future UI generation
@@ -749,6 +772,20 @@ func (p *Project) CreateViteReactProject(projectPath string) error {
 		// Don't return error if file doesn't exist
 		if !os.IsNotExist(err) {
 			return fmt.Errorf("failed to remove index.css: %w", err)
+		}
+	}
+
+	if err := os.Remove(filepath.Join(srcDir, "App.css")); err != nil {
+		// Don't return error if file doesn't exist
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("failed to remove App.css: %w", err)
+		}
+	}
+
+	if err := os.Remove(filepath.Join(srcDir, "App.tsx")); err != nil {
+		// Don't return error if file doesn't exist
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("failed to remove App.tsx: %w", err)
 		}
 	}
 

@@ -19,8 +19,8 @@ type model struct {
 func NewSpinnerModel() model {
 	t := styles.CurrentTheme()
 	s := spinner.New()
-	s.Spinner = spinner.Line
-	s.Style = t.S().Base.Foreground(t.Accent).Bold(true)
+	s.Spinner = spinner.Dot
+	s.Style = t.S().Base.Foreground(t.Primary).Bold(true)
 
 	return model{spinner: s}
 }

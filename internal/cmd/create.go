@@ -104,6 +104,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 
 	if flagAdvanced {
 		fmt.Println(theme.S().Title.Render("*** You are in advanced mode ***"))
+		fmt.Println()
 	}
 
 	if project.ProjectName == "" {
@@ -209,7 +210,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 						project.AdvancedOptions[strings.ToLower(options.Advanced.Choices[key])] = opt
 						err := cmd.Flag("feature").Value.Set(strings.ToLower(options.Advanced.Choices[key]))
 						if err != nil {
-							log.Fatal("failed to set the feature flag value", err)
+							log.Fatal("failed to set the feature flag value ", err)
 						}
 					}
 				}
@@ -282,19 +283,19 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 		tipsContent := lipgloss.JoinVertical(
 			lipgloss.Left,
 			theme.S().Title.Render("Next steps:"),
-			lipgloss.JoinHorizontal(lipgloss.Left, theme.S().TextSelected.Render(fmt.Sprintf("cd %s", rootDir))),
+			theme.S().Text.Render(fmt.Sprintf("- cd %s", rootDir)),
 		)
 
 		fmt.Println(tipsContent)
 
 		if project.AdvancedOptions["react"] {
-			tipsContent = lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinHorizontal(lipgloss.Left, theme.S().Subtle.Render("• "), theme.S().Text.Render("cd frontend")), lipgloss.JoinHorizontal(lipgloss.Left, theme.S().Subtle.Render("• "), theme.S().Text.Render("npm install")), lipgloss.JoinHorizontal(lipgloss.Left, theme.S().Subtle.Render("• "), theme.S().Text.Render("npm run dev")))
+			tipsContent = lipgloss.JoinVertical(lipgloss.Left, theme.S().Text.Render("- cd frontend"), theme.S().Text.Render("- npm install"), theme.S().Text.Render("- npm run dev"))
 
 			fmt.Println(tipsContent)
 		}
 		if isInteractive {
 			nonInteractiveCommand := NonInteractiveCommand(cmd.Use, cmd.Flags())
-			tipsContent = lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinHorizontal(lipgloss.Left, theme.S().Info.Render("Tip - "), theme.S().Text.Render("Repeat with the following non-interactive command:")), theme.S().TextSelected.Render(nonInteractiveCommand))
+			tipsContent = lipgloss.JoinVertical(lipgloss.Left, theme.S().Text.Render("Repeat with the following non-interactive command:"), theme.S().Title.Render(nonInteractiveCommand))
 
 			fmt.Println(tipsContent)
 		}
