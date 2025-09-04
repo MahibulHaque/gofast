@@ -674,6 +674,40 @@ func (p *Project) CreateViteReactProject(projectPath string) error {
 		return fmt.Errorf("failed to create src directory: %w", err)
 	}
 
+	err = p.CreateFileWithInjection("", projectPath, ".env", "env")
+	if err != nil {
+		return fmt.Errorf("failed to create global .env file: %w", err)
+	}
+
+	// Read from the global `.env` file and create the frontend-specific `.env`
+	globalEnvPath := filepath.Join(projectPath, ".env")
+	vitePort := "8080" // Default fallback
+
+	// Read the global .env file
+	if data, err := os.ReadFile(globalEnvPath); err == nil {
+		lines := strings.Split(string(data), "\n")
+		for _, line := range lines {
+			if strings.HasPrefix(line, "PORT=") {
+				vitePort = strings.SplitN(line, "=", 2)[1] // Get the backend port value
+				break
+			}
+		}
+	}
+
+	// Use a template to generate the frontend .env file
+	frontendEnvContent := fmt.Sprintf("VITE_PORT=%s\n", vitePort)
+	if err := os.WriteFile(filepath.Join(frontendPath, ".env"), []byte(frontendEnvContent), 0644); err != nil {
+		return fmt.Errorf("failed to create frontend .env file: %w", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(frontendPath, "package.json"), advanced.ReactPackageJsonFile(), 0644); err != nil {
+		return fmt.Errorf("failed to write package.json template: %w", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(frontendPath, "tsconfig.json"), advanced.ReactTsConfigJsonFile(), 0644); err != nil {
+		return fmt.Errorf("failed to write tsconfig.json template: %w", err)
+	}
+
 	if err := os.WriteFile(filepath.Join(frontendPath, "vite.config.ts"), advanced.ReactViteConfigFile(), 0644); err != nil {
 		return fmt.Errorf("failed to write main.tsx template: %w", err)
 	}
@@ -711,82 +745,11 @@ func (p *Project) CreateViteReactProject(projectPath string) error {
 		return fmt.Errorf("failed to write components.json template: %w", err)
 	}
 
-	// Ensure Vite index.html uses #app to match main.tsx
-	indexHtmlPath := filepath.Join(frontendPath, "index.html")
-	if data, err := os.ReadFile(indexHtmlPath); err == nil {
-		updated := strings.ReplaceAll(string(data), "id=\"root\"", "id=\"app\"")
-		if updated != string(data) {
-			if err := os.WriteFile(indexHtmlPath, []byte(updated), 0644); err != nil {
-				return fmt.Errorf("failed to update index.html root id: %w", err)
-			}
+	if err := os.Remove(filepath.Join(srcDir, "index.css")); err != nil {
+		// Don't return error if file doesn't exist
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("failed to remove index.css: %w", err)
 		}
-	}
-
-	err = p.CreateFileWithInjection("", projectPath, ".env", "env")
-	if err != nil {
-		return fmt.Errorf("failed to create global .env file: %w", err)
-	}
-
-	// Read from the global `.env` file and create the frontend-specific `.env`
-	globalEnvPath := filepath.Join(projectPath, ".env")
-	vitePort := "8080" // Default fallback
-
-	// Read the global .env file
-	if data, err := os.ReadFile(globalEnvPath); err == nil {
-		lines := strings.Split(string(data), "\n")
-		for _, line := range lines {
-			if strings.HasPrefix(line, "PORT=") {
-				vitePort = strings.SplitN(line, "=", 2)[1] // Get the backend port value
-				break
-			}
-		}
-	}
-
-	// Use a template to generate the frontend .env file
-	frontendEnvContent := fmt.Sprintf("VITE_PORT=%s\n", vitePort)
-	if err := os.WriteFile(filepath.Join(frontendPath, ".env"), []byte(frontendEnvContent), 0644); err != nil {
-		return fmt.Errorf("failed to create frontend .env file: %w", err)
-	}
-
-	// Install dependencies
-	// 1) Install base template deps
-	installCmd := exec.Command("npm", "install", "--prefer-offline", "--no-fund")
-	installCmd.Stdout = os.Stdout
-	installCmd.Stderr = os.Stderr
-	if err := installCmd.Run(); err != nil {
-		return fmt.Errorf("failed to run npm install: %w", err)
-	}
-
-	// 2) Install TanStack runtime deps and utilities
-	deps := []string{
-		"@tanstack/react-router",
-		"@tanstack/react-query",
-		"tailwindcss",
-		"@tailwindcss/vite",
-		"clsx",
-		"tailwind-merge",
-	}
-	addDepsCmd := exec.Command("npm", append([]string{"install"}, deps...)...)
-	addDepsCmd.Stdout = os.Stdout
-	addDepsCmd.Stderr = os.Stderr
-	if err := addDepsCmd.Run(); err != nil {
-		return fmt.Errorf("failed to install runtime deps: %w", err)
-	}
-
-	// 3) Install dev deps: Vite plugins for React, TanStack Router, Tailwind v4 plugin, types
-	devDeps := []string{
-		"-D",
-		"@tanstack/react-query-devtools",
-		"@tanstack/react-router-devtools",
-		"@tanstack/react-devtools",
-		"@tanstack/router-plugin",
-		"@tanstack/eslint-plugin-query",
-	}
-	addDevDepsCmd := exec.Command("npm", append([]string{"install"}, devDeps...)...)
-	addDevDepsCmd.Stdout = os.Stdout
-	addDevDepsCmd.Stderr = os.Stderr
-	if err := addDevDepsCmd.Run(); err != nil {
-		return fmt.Errorf("failed to install dev deps: %w", err)
 	}
 
 	return nil

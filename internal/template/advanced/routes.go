@@ -28,6 +28,12 @@ var reactRootRouteFile []byte
 //go:embed files/react/src/lib/utils.ts.tmpl
 var reactUtilsFile []byte
 
+//go:embed files/react/package.json.tmpl
+var reactPackageJsonFile []byte
+
+//go:embed files/react/tsconfig.json.tmpl
+var reactTsConfigJsonFile []byte
+
 func StdLibWebsocketTemplImportsTemplate() []byte {
 	return stdLibWebsocketImports
 }
@@ -50,6 +56,14 @@ func ReactStylesCssFile() []byte {
 
 func ReactMainFile() []byte {
 	return reactMainFile
+}
+
+func ReactPackageJsonFile() []byte {
+	return reactPackageJsonFile
+}
+
+func ReactTsConfigJsonFile() []byte {
+	return reactTsConfigJsonFile
 }
 
 func ReactRootRouteFile() []byte {
