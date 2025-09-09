@@ -28,3 +28,11 @@ func (c ChiTemplates) Routes() []byte {
 func (c ChiTemplates) WebsocketImports() []byte {
 	return advanced.StdLibWebsocketTemplImportsTemplate()
 }
+
+func (c ChiTemplates) RequestPackage() []byte {
+	return standardRequestPackageTemplate
+}
+
+func (c ChiTemplates) ResponsePackage() []byte {
+	return standardResponsePackageTemplate
+}

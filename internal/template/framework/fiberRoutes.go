@@ -31,3 +31,11 @@ func (f FiberTemplates) Routes() []byte {
 func (f FiberTemplates) WebsocketImports() []byte {
 	return advanced.FiberWebsocketTemplImportsTemplate()
 }
+
+func (f FiberTemplates) RequestPackage() []byte {
+	return fiberRequestPackageTemplate
+}
+
+func (f FiberTemplates) ResponsePackage() []byte {
+	return fiberResponsePackageTemplate
+}

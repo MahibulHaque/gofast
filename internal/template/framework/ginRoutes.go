@@ -28,3 +28,11 @@ func (g GinTemplates) Routes() []byte {
 func (g GinTemplates) WebsocketImports() []byte {
 	return advanced.StdLibWebsocketTemplImportsTemplate()
 }
+
+func (g GinTemplates) RequestPackage() []byte {
+	return ginRequestPackageTemplate
+}
+
+func (g GinTemplates) ResponsePackage() []byte {
+	return ginResponsePackageTemplate
+}

@@ -31,3 +31,11 @@ func (s StandardLibTemplate) Routes() []byte {
 func (s StandardLibTemplate) WebsocketImports() []byte {
 	return advanced.StdLibWebsocketTemplImportsTemplate()
 }
+
+func (s StandardLibTemplate) RequestPackage() []byte {
+	return standardRequestPackageTemplate
+}
+
+func (s StandardLibTemplate) ResponsePackage() []byte {
+	return standardResponsePackageTemplate
+}

@@ -27,3 +27,11 @@ func (r RouterTemplates) Routes() []byte {
 func (r RouterTemplates) WebsocketImports() []byte {
 	return advanced.StdLibWebsocketTemplImportsTemplate()
 }
+
+func (r RouterTemplates) RequestPackage() []byte {
+	return standardRequestPackageTemplate
+}
+
+func (r RouterTemplates) ResponsePackage() []byte {
+	return standardResponsePackageTemplate
+}

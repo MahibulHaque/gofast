@@ -65,6 +65,8 @@ type Templater interface {
 	Server() []byte
 	Routes() []byte
 	WebsocketImports() []byte
+	RequestPackage() []byte
+	ResponsePackage() []byte
 }
 
 type DBDriverTemplater interface {
@@ -101,12 +103,14 @@ var (
 )
 
 const (
-	root                 = "/"
-	cmdApiPath           = "cmd/api"
-	cmdWebPath           = "cmd/web"
-	internalServerPath   = "internal/server"
-	internalDatabasePath = "internal/db"
-	githubActionPath     = ".github/workflows"
+	root                        = "/"
+	cmdApiPath                  = "cmd/api"
+	cmdWebPath                  = "cmd/web"
+	internalServerPath          = "internal/server"
+	internalDatabasePath        = "internal/db"
+	internalRequestPackagePath  = "internal/request"
+	internalResponsePackagePath = "internal/response"
+	githubActionPath            = ".github/workflows"
 )
 
 func (p *Project) CheckOS() {
@@ -363,6 +367,19 @@ func (p *Project) CreateMainFile() error {
 		log.Printf("Error creating path: %s", internalServerPath)
 		return err
 	}
+
+	err = p.CreatePath(internalRequestPackagePath, projectPath)
+	if err != nil {
+		log.Printf("Error creating path: %s", internalRequestPackagePath)
+		return err
+	}
+
+	err = p.CreatePath(internalResponsePackagePath, projectPath)
+	if err != nil {
+		log.Printf("Error creating path: %s", internalResponsePackagePath)
+		return err
+	}
+
 	if p.AdvancedOptions[string(flags.React)] {
 		if err := p.CreateViteReactProject(projectPath); err != nil {
 			return fmt.Errorf("failed to set up React project: %w", err)
@@ -434,6 +451,18 @@ func (p *Project) CreateMainFile() error {
 	err = p.CreateFileWithInjection(internalServerPath, projectPath, "server.go", "server")
 	if err != nil {
 		log.Printf("Error injecting server.go file: %v", err)
+		return err
+	}
+
+	err = p.CreateFileWithInjection(internalRequestPackagePath, projectPath, "request.go", "request")
+	if err != nil {
+		log.Printf("Error injecting request.go file: %v", err)
+		return err
+	}
+
+	err = p.CreateFileWithInjection(internalResponsePackagePath, projectPath, "response.go", "response")
+	if err != nil {
+		log.Printf("Error injecting request.go file: %v", err)
 		return err
 	}
 
@@ -555,6 +584,12 @@ func (p *Project) CreateFileWithInjection(pathToCreate string, projectPath strin
 	case "routes":
 		routeFileBytes := p.FrameworkMap[p.ProjectType].templater.Routes()
 		createdTemplate := template.Must(template.New(fileName).Parse(string(routeFileBytes)))
+		err = createdTemplate.Execute(createdFile, p)
+	case "request":
+		createdTemplate := template.Must(template.New(fileName).Parse(string(p.FrameworkMap[p.ProjectType].templater.RequestPackage())))
+		err = createdTemplate.Execute(createdFile, p)
+	case "response":
+		createdTemplate := template.Must(template.New(fileName).Parse(string(p.FrameworkMap[p.ProjectType].templater.ResponsePackage())))
 		err = createdTemplate.Execute(createdFile, p)
 	case "releaser":
 		createdTemplate := template.Must(template.New(fileName).Parse(string(advanced.Releaser())))

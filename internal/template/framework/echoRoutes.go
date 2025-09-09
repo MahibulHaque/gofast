@@ -27,3 +27,11 @@ func (e EchoTemplates) Routes() []byte {
 func (e EchoTemplates) WebsocketImports() []byte {
 	return advanced.StdLibWebsocketTemplImportsTemplate()
 }
+
+func (e EchoTemplates) RequestPackage() []byte {
+	return echoRequestPackageTemplate
+}
+
+func (e EchoTemplates) ResponsePackage() []byte {
+	return echoResponsePackageTemplate
+}

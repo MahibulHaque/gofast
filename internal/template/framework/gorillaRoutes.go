@@ -28,3 +28,11 @@ func (g GorillaTemplates) Routes() []byte {
 func (g GorillaTemplates) WebsocketImports() []byte {
 	return advanced.StdLibWebsocketTemplImportsTemplate()
 }
+
+func (g GorillaTemplates) RequestPackage() []byte {
+	return standardRequestPackageTemplate
+}
+
+func (g GorillaTemplates) ResponsePackage() []byte {
+	return standardResponsePackageTemplate
+}

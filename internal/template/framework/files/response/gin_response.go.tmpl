@@ -1,0 +1,43 @@
+package response
+
+import (
+	"encoding/json"
+	"net/http"
+	"github.com/gin-gonic/gin"
+)
+
+func JSON(c *gin.Context, status int, data any) error {
+	return JSONWithHeaders(c, status, data, nil)
+}
+
+func JSONWithHeaders(c *gin.Context, status int, data any, headers http.Header) error {
+	js, err := json.MarshalIndent(data, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	js = append(js, '\n')
+
+	for key, values := range headers {
+		for _, value := range values {
+			c.Header(key, value)
+		}
+	}
+
+	c.Data(status, "application/json", js)
+	return nil
+}
+
+// Alternative: Use Gin's built-in JSON methods (more idiomatic)
+func JSONGinStyle(c *gin.Context, status int, data any) {
+	c.JSON(status, data)
+}
+
+func JSONWithHeadersGinStyle(c *gin.Context, status int, data any, headers http.Header) {
+	for key, values := range headers {
+		for _, value := range values {
+			c.Header(key, value)
+		}
+	}
+	c.JSON(status, data)
+}
