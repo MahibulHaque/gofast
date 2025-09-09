@@ -3,7 +3,7 @@ package program
 import (
 	"bytes"
 	"fmt"
-	"html/template"
+	"text/template" // Changed from "html/template" to "text/template"
 	"log"
 	"os"
 	"os/exec"
@@ -448,6 +448,12 @@ func (p *Project) CreateMainFile() error {
 		}
 	}
 
+	err = p.CreateFileWithInjection(internalServerPath, projectPath, "routes.go", "routes")
+	if err != nil {
+		log.Printf("Error injecting routes.go file: %v", err)
+		return err
+	}
+
 	err = p.CreateFileWithInjection(internalServerPath, projectPath, "server.go", "server")
 	if err != nil {
 		log.Printf("Error injecting server.go file: %v", err)
@@ -462,7 +468,7 @@ func (p *Project) CreateMainFile() error {
 
 	err = p.CreateFileWithInjection(internalResponsePackagePath, projectPath, "response.go", "response")
 	if err != nil {
-		log.Printf("Error injecting request.go file: %v", err)
+		log.Printf("Error injecting response.go file: %v", err)
 		return err
 	}
 
