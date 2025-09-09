@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var GoFastVersion string
+var GofastVersion string
 
 // Go Fast needs to be built in a specific way to provide useful version information.
 // First we try to get the version from ldflags embedded into GoFastVersion.
@@ -19,8 +19,8 @@ var GoFastVersion string
 func getGoFastVersion() string {
 	noVersionAvailable := "No version info available for this build, run 'gofast help version' for additional info"
 
-	if len(GoFastVersion) != 0 {
-		return GoFastVersion
+	if len(GofastVersion) != 0 {
+		return GofastVersion
 	}
 
 	bi, ok := debug.ReadBuildInfo()
