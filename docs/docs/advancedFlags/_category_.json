@@ -1,0 +1,8 @@
+{
+  "label": "Advanced Flags",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Advanced flags which allow for CI/CD, websocket and frontend repository integration"
+  }
+}

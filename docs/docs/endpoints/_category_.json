@@ -1,0 +1,8 @@
+{
+  "label": "Testing Endpoints",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "description": "Test the pre-built server, websocket and database health endpoints."
+  }
+}
