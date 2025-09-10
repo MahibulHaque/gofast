@@ -37,7 +37,7 @@ type Model struct {
 	selection *Selection
 	header    string
 	project   *program.Project
-	quitting  bool
+	exit  *bool
 	keyMap    keyMap
 }
 
@@ -114,6 +114,7 @@ func NewListModel(items []steps.Item, selection *Selection, header string, proje
 		header:    header,
 		project:   project,
 		keyMap:    keys,
+		exit: &project.Exit,
 	}
 }
 
@@ -201,7 +202,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keyMap.quit):
-			m.quitting = true
+			*m.exit = true
 			return m, tea.Quit
 
 		case key.Matches(msg, m.keyMap.confirm):
@@ -224,7 +225,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View implements tea.Model
 func (m *Model) View() string {
-	if m.quitting {
+	if *m.exit {
 		return ""
 	}
 

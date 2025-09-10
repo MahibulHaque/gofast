@@ -18,7 +18,6 @@ type MultiSelection struct {
 	Flags     []string
 	Selected  map[int]bool
 	Confirmed bool
-	Cancelled bool // Add this field to track cancellation
 }
 
 // MultiModel represents the multi-select list component model
@@ -27,7 +26,7 @@ type MultiModel struct {
 	selection *MultiSelection
 	header    string
 	project   *program.Project
-	quitting  bool
+	exit     *bool
 	keyMap    multiKeyMap
 }
 
@@ -101,6 +100,7 @@ func NewMultiListModel(items []steps.Item, selection *MultiSelection, header str
 		header:    header,
 		project:   project,
 		keyMap:    multiKeys,
+		exit: &project.Exit,
 	}
 }
 
@@ -188,12 +188,14 @@ func (m *MultiModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.keyMap.quit):
-			m.selection.Cancelled = true
-			m.quitting = true
+		// Handle quit keys FIRST, before any other processing
+		if key.Matches(msg, m.keyMap.quit) {
+			*m.exit=true
 			return m, tea.Quit
+		}
 
+		// Handle other custom keys
+		switch {
 		case key.Matches(msg, m.keyMap.toggle):
 			idx := m.list.Index()
 			m.selection.Selected[idx] = !m.selection.Selected[idx]
@@ -219,6 +221,7 @@ func (m *MultiModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	// Only pass to list if we haven't handled the message above
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
@@ -226,7 +229,7 @@ func (m *MultiModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View implements tea.Model
 func (m *MultiModel) View() string {
-	if m.quitting {
+	if *m.exit {
 		return ""
 	}
 

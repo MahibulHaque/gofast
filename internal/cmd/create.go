@@ -198,20 +198,11 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 
 				isInteractive = true
 				step := steps.Steps["advanced"]
-				// Create the selection object
-				selection := &list.MultiSelection{}
+				tprogram = tea.NewProgram(list.NewMultiSelectFromStep(step, options.Advanced, project))
 
-				// Create the model with the selection
-				model := list.NewMultiSelectFromStep(step, selection, project)
-				tprogram := tea.NewProgram(model)
 
 				if _, err := tprogram.Run(); err != nil {
 					cobra.CheckErr(textinput.CreateErrorInputModel(err).Err())
-				}
-
-				// Check if user cancelled after the program finishes
-				if selection.Cancelled {
-					project.Exit = true
 				}
 
 				project.ExitCLI(tprogram)
