@@ -11,15 +11,15 @@ services:
     environment:
       APP_ENV: ${APP_ENV}
       PORT: ${PORT}
-      DB_HOST: ${BLUEPRINT_DB_HOST}
-      DB_PORT:  ${BLUEPRINT_DB_PORT}
-      DB_USERNAME: ${BLUEPRINT_DB_USERNAME}
-      DB_ROOT_PASSWORD: ${BLUEPRINT_DB_ROOT_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT:  ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     depends_on:
       mongo:
         condition: service_healthy
     networks:
-      - blueprint
+      - gofast
 {{- end }}
 {{- if and .AdvancedOptions.react .AdvancedOptions.docker }}
   frontend:
@@ -33,7 +33,7 @@ services:
     ports:
       - 5173:5173
     networks:
-      - blueprint
+      - gofast
 {{- end }}
   mongo:
     image: mongo:latest
@@ -53,7 +53,7 @@ services:
       retries: 3
       start_period: 15s
     networks:
-      - blueprint
+      - gofast
     {{- end }}
 
 volumes:

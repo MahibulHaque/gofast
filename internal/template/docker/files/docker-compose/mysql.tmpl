@@ -17,10 +17,10 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
-      mysql_bp:
+      mysql:
         condition: service_healthy
     networks:
-      - blueprint
+      - gofast
 {{- end }}
 {{- if and .AdvancedOptions.react .AdvancedOptions.docker }}
   frontend:
@@ -34,9 +34,9 @@ services:
     ports:
       - 5173:5173
     networks:
-      - blueprint
+      - gofast
 {{- end }}
-  mysql_bp:
+  mysql:
     image: mysql:latest
     restart: unless-stopped
     environment:
@@ -47,7 +47,7 @@ services:
     ports:
       - "${DB_PORT}:3306"
     volumes:
-      - mysql_volume_bp:/var/lib/mysql
+      - mysql_volume:/var/lib/mysql
     {{- if .AdvancedOptions.docker }}
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "${DB_HOST}", "-u", "${DB_USERNAME}", "--password=${DB_PASSWORD}"]
@@ -60,8 +60,8 @@ services:
     {{- end }}
 
 volumes:
-  mysql_volume_bp:
+  mysql_volume:
 {{- if .AdvancedOptions.docker }}
 networks:
-  blueprint:
+  gofast:
 {{- end }}

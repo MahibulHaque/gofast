@@ -94,7 +94,7 @@ func createCmdRun(cmd *cobra.Command, args []string) {
 	}
 
 	steps := steps.InitSteps(flagFramework, flagDBDriver)
-	fmt.Printf("%s\n", logo.Render("0.0.1", false, logo.DefaultOpts()))
+	fmt.Printf("%s\n", logo.Render("0.1.0", false, logo.DefaultOpts()))
 
 	// Advanced option steps:
 	flagAdvanced, err := cmd.Flags().GetBool("advanced")

@@ -21,7 +21,7 @@ services:
       psql:
         condition: service_healthy
     networks:
-      - blueprint
+      - gofast
 {{- end }}
 {{- if and .AdvancedOptions.react .AdvancedOptions.docker }}
   frontend:
@@ -35,7 +35,7 @@ services:
     ports:
       - 5173:5173
     networks:
-      - blueprint
+      - gofast
 {{- end }}
   psql:
     image: postgres:latest
@@ -56,7 +56,7 @@ services:
       retries: 3
       start_period: 15s
     networks:
-      - blueprint
+      - gofast
     {{- end }}
 
 volumes:

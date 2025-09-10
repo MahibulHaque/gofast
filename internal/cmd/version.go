@@ -17,7 +17,7 @@ var GofastVersion string
 // This won't give any version info when running 'go install' with the source code locally.
 // Finally we try to get the version from other embedded VCS info.
 func getGoFastVersion() string {
-	noVersionAvailable := "No version info available for this build, run 'gofast help version' for additional info"
+	noVersionAvailable := "No version info available for this build, run 'gofast version' for additional info"
 
 	if len(GofastVersion) != 0 {
 		return GofastVersion
