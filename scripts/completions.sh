@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -e
 rm -rf completions
 mkdir completions
