@@ -22,9 +22,6 @@ jobs:
         with:
           go-version: "1.25.0"
           
-      - name: Make completions script executable
-        run: chmod +x scripts/completions.sh
-        
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:

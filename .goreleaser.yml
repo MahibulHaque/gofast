@@ -3,8 +3,7 @@ version: 2
 before:
   hooks:
     - go mod tidy
-    - chmod +x scripts/completions.sh
-    - ./scripts/completions.sh
+    - bash scripts/completions.sh
 
 builds:
   - binary: gofast
