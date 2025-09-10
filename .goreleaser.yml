@@ -1,7 +1,11 @@
+version: 2
+
 before:
   hooks:
     - go mod tidy
+    - chmod +x scripts/completions.sh
     - ./scripts/completions.sh
+
 builds:
   - binary: gofast
     main: ./
@@ -22,9 +26,15 @@ release:
 
 universal_binaries:
   - replace: true
+
 archives:
   - name_template: >-
-      {{- .ProjectName }}_ {{- .Version }}_ {{- title .Os }}_ {{- if eq .Arch "amd64" }}x86_64 {{- else if eq .Arch "386" }}i386 {{- else }}{{ .Arch }}{{ end }} {{- if .Arm }}v{{ .Arm }}{{ end -}}
+      {{- .ProjectName }}_{{- .Version }}_{{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end -}}
+    format: tar.gz
     format_overrides:
       - goos: windows
         format: zip
