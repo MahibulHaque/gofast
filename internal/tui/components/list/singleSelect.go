@@ -42,28 +42,38 @@ type Model struct {
 }
 
 type keyMap struct {
+	up key.Binding
+	down key.Binding
 	confirm key.Binding
 	quit    key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.confirm, k.quit}
+	return []key.Binding{k.down, k.up, k.confirm, k.quit}
 }
 
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.confirm, k.quit},
+		{k.down, k.up, k.confirm, k.quit},
 	}
 }
 
 var keys = keyMap{
+	up: key.NewBinding(
+		key.WithKeys("up", "k"),
+		key.WithHelp("↑ / k", "(move up)"),
+	),
+	down: key.NewBinding(
+		key.WithKeys("down", "j"),
+		key.WithHelp("↓ / j", "(move down)"),
+	),
 	confirm: key.NewBinding(
 		key.WithKeys("enter"),
-		key.WithHelp("enter", "confirm selection"),
+		key.WithHelp("enter", "(confirm selection)"),
 	),
 	quit: key.NewBinding(
 		key.WithKeys("q", "esc", "ctrl+c"),
-		key.WithHelp("q", "quit"),
+		key.WithHelp("q / esc / ctrl+c", "(quit)"),
 	),
 }
 
@@ -86,11 +96,17 @@ func NewListModel(items []steps.Item, selection *Selection, header string, proje
 	l.Title = header
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
+	l.SetShowHelp(false)
 	l.Styles.Title = theme.S().Title
 	l.Styles.PaginationStyle = theme.S().Muted.
 		Padding(0, 1)
 	l.Styles.HelpStyle = theme.S().Muted.
 		Padding(1, 0, 0, 2)
+	
+	l.Help.Styles.ShortKey = theme.S().Help.ShortKey
+	l.Help.Styles.ShortDesc = theme.S().Help.ShortDesc
+	l.Help.Styles.FullKey = theme.S().Help.FullKey
+	l.Help.Styles.FullDesc = theme.S().Help.FullDesc
 
 	return &Model{
 		list:      l,

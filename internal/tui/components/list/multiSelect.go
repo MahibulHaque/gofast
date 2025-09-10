@@ -18,6 +18,7 @@ type MultiSelection struct {
 	Flags     []string
 	Selected  map[int]bool
 	Confirmed bool
+	Cancelled bool // Add this field to track cancellation
 }
 
 // MultiModel represents the multi-select list component model
@@ -49,15 +50,15 @@ func (k multiKeyMap) FullHelp() [][]key.Binding {
 var multiKeys = multiKeyMap{
 	toggle: key.NewBinding(
 		key.WithKeys(" ", "space"),
-		key.WithHelp("space", "toggle item"),
+		key.WithHelp("space", "(toggle item)"),
 	),
 	confirm: key.NewBinding(
 		key.WithKeys("y"),
-		key.WithHelp("y", "confirm selection"),
+		key.WithHelp("y", "(confirm selection)"),
 	),
 	quit: key.NewBinding(
 		key.WithKeys("q", "esc", "ctrl+c"),
-		key.WithHelp("q", "quit"),
+		key.WithHelp("q / esc / ctrl+c", "(quit)"),
 	),
 }
 
@@ -78,11 +79,17 @@ func NewMultiListModel(items []steps.Item, selection *MultiSelection, header str
 	l.Title = header
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
+	l.SetShowHelp(false)
 	l.Styles.Title = theme.S().Title
 	l.Styles.PaginationStyle = theme.S().Muted.
 		Padding(0, 1)
 	l.Styles.HelpStyle = theme.S().Muted.
 		Padding(1, 0, 0, 2)
+
+	l.Help.Styles.ShortKey = theme.S().Help.ShortKey
+	l.Help.Styles.ShortDesc = theme.S().Help.ShortDesc
+	l.Help.Styles.FullKey = theme.S().Help.FullKey
+	l.Help.Styles.FullDesc = theme.S().Help.FullDesc
 
 	if selection.Selected == nil {
 		selection.Selected = make(map[int]bool)
@@ -183,6 +190,7 @@ func (m *MultiModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keyMap.quit):
+			m.selection.Cancelled = true
 			m.quitting = true
 			return m, tea.Quit
 
@@ -227,7 +235,7 @@ func (m *MultiModel) View() string {
 	view := m.list.View()
 
 	// Inject help controls footer
-	help := theme.S().Muted.Render("\n" + m.list.Help.View(m.keyMap))
+	help := theme.S().Text.Render("\n" + m.list.Help.View(m.keyMap))
 	return theme.S().Base.Render(view + help)
 }
 
